@@ -1,0 +1,106 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 7, 6, 5, 4, 3);  // Initialize the LCD library with the pins you are using
+
+const int buttonHour = A0; // Pin for the button to adjust hours
+const int buttonMinute = A1; // Pin for the button to adjust minutes
+const int buttonSecond = A2; // Pin for the button to adjust seconds
+const int buttonReset = A3; // Pin for the button to reset the timer
+
+int hours = 0;
+int minutes = 0;
+int seconds = 0;
+
+bool startPressed = false; // Flag to track if the start button has been pressed
+
+void setup() {
+  lcd.begin(16, 2);  // Set up the LCD's number of columns and rows
+  pinMode(buttonHour, INPUT_PULLUP); // Set button pins as input with pullup resistors
+  pinMode(buttonMinute, INPUT_PULLUP);
+  pinMode(buttonSecond, INPUT_PULLUP);
+  pinMode(buttonReset, INPUT_PULLUP);
+  displayTime();
+}
+
+void loop() {
+  // Check buttons
+  if (digitalRead(buttonHour) == LOW) {
+    hours++;
+    if (hours >= 24) {
+      hours = 0;
+    }
+    displayTime();
+    delay(250); // debounce delay
+  }
+  if (digitalRead(buttonMinute) == LOW) {
+    minutes++;
+    if (minutes >= 60) {
+      minutes = 0;
+    }
+    displayTime();
+    delay(250); // debounce delay
+  }
+  if (digitalRead(buttonSecond) == LOW) {
+    seconds++;
+    if (seconds >= 60) {
+      seconds = 0;
+    }
+    displayTime();
+    delay(250); // debounce delay
+  }
+  if (digitalRead(buttonReset) == LOW) {
+    // Check if the start button has been pressed
+    if (startPressed) {
+      // Reset the timer
+      hours = 0;
+      minutes = 0;
+      seconds = 0;
+      displayTime();
+      startPressed = false; // Reset the start button flag
+    } else {
+      // Start button pressed for the first time
+      startPressed = true;
+    }
+    delay(250); // debounce delay
+  }
+
+  // Countdown logic
+  if (startPressed) {
+    if (hours == 0 && minutes == 0 && seconds == 0) {
+      lcd.setCursor(0, 1);
+      lcd.print("Pills Time!");
+    } else {
+      delay(1000); // One second delay
+      if (seconds == 0) {
+        if (minutes > 0) {
+          minutes--;
+          seconds = 59;
+        } else if (hours > 0) {
+          hours--;
+          minutes = 59;
+          seconds = 59;
+        }
+      } else {
+        seconds--;
+      }
+      displayTime();
+    }
+  }
+}
+
+void displayTime() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Time: ");
+  lcd.print(hours);
+  lcd.print(":");
+  if (minutes < 10) {
+    lcd.print("0");
+  }
+  lcd.print(minutes);
+  lcd.print(":");
+  if (seconds < 10) {
+    lcd.print("0");
+  }
+  lcd.print(seconds);
+}
