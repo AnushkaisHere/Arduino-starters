@@ -1,0 +1,19 @@
+// Define LED pins
+int led1 = 2;
+// Define the rest of the LED pins
+void setup() {
+// Initialize each pin as an output
+pinMode(led1, OUTPUT);
+// Initialize the rest of the pins as outputs
+}
+void loop() {
+// Light up the first LED
+digitalWrite(led1, HIGH);
+delay(1000);
+digitalWrite(led1, LOW);
+// Add code to light up the second LED
+// ...
+// Continue for the rest of the LEDs
+// ...
+// Ensure each LED is turned off after being lit
+}
