@@ -1,0 +1,65 @@
+// Pin definitions
+const int ledPin = 13;  // The built-in LED pin on most Arduino boards
+const int buttonPin = 2; // The pin where the button is connected
+
+// Variable to store the current state of the LED
+bool ledState = LOW;
+
+// Variable to store whether the LED is blinking or not
+bool isBlinking = true;
+
+// Variable to store the state of the button
+int buttonState;
+
+// Variable to store the previous state of the button
+int lastButtonState = LOW;
+
+// Variable to store the last time the LED state was toggled
+unsigned long previousMillis = 0;
+
+// Interval at which the LED should blink (in milliseconds)
+const long interval = 1000; // 1 second
+
+void setup() {
+  // Initialize the LED pin as an output
+  pinMode(ledPin, OUTPUT);
+  
+  // Initialize the button pin as an input with the internal pull-up resistor enabled
+  pinMode(buttonPin, INPUT_PULLUP);
+}
+
+void loop() {
+  // Read the state of the button
+  buttonState = digitalRead(buttonPin);
+  
+  // Check if the button is pressed
+  if (buttonState == HIGH && lastButtonState == LOW) {
+    // Toggle the blinking state
+    isBlinking = !isBlinking;
+    
+    // If blinking is now stopped, turn off the LED
+    if (!isBlinking) {
+      digitalWrite(ledPin, LOW);
+    }
+  }
+  
+  // Update the last button state
+  lastButtonState = buttonState;
+  
+  // If blinking is enabled, blink the LED
+  if (isBlinking) {
+    unsigned long currentMillis = millis();
+    
+    // Check if it's time to blink the LED
+    if (currentMillis - previousMillis >= interval) {
+      // Save the last time the LED state was toggled
+      previousMillis = currentMillis;
+      
+      // Toggle the LED state
+      ledState = !ledState;
+      
+      // Apply the new LED state
+      digitalWrite(ledPin, ledState);
+    }
+  }
+}
