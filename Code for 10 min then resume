@@ -1,0 +1,69 @@
+// Pin definitions
+const int ledPin = 13;  // The built-in LED pin on most Arduino boards
+const int buttonPin = 2; // The pin where the button is connected
+
+// Variable to store the current state of the LED
+bool ledState = LOW;
+
+// Variable to store whether the LED is blinking or not
+bool isBlinking = true;
+
+// Variable to store the state of the button
+int buttonState;
+
+// Variable to store the previous state of the button
+int lastButtonState = LOW;
+
+// Variable to store the last time the button was pressed
+unsigned long lastButtonPressTime = 0;
+
+// Time to pause blinking when the button is pressed (in milliseconds)
+const long pauseDuration = 10000; // 10 seconds
+
+// Interval at which the LED should blink (in milliseconds)
+const long blinkInterval = 500; // 0.5 second
+
+void setup() {
+  // Initialize the LED pin as an output
+  pinMode(ledPin, OUTPUT);
+  
+  // Initialize the button pin as an input with the internal pull-up resistor enabled
+  pinMode(buttonPin, INPUT_PULLUP);
+}
+
+void loop() {
+  // Read the state of the button
+  buttonState = digitalRead(buttonPin);
+  
+  // Check if the button is pressed
+  if (buttonState == HIGH && lastButtonState == LOW) {
+    // Stop blinking and remember the time when the button was pressed
+    isBlinking = false;
+    lastButtonPressTime = millis();
+  }
+  
+  // Update the last button state
+  lastButtonState = buttonState;
+  
+  // Check if the pause duration has passed since the button was pressed
+  if (!isBlinking && millis() - lastButtonPressTime >= pauseDuration) {
+    isBlinking = true; // Resume blinking after pause duration
+  }
+  
+  // If blinking is enabled, blink the LED
+  if (isBlinking) {
+    unsigned long currentMillis = millis();
+    
+    // Check if it's time to blink the LED
+    if (currentMillis - lastButtonPressTime >= blinkInterval) {
+      // Toggle the LED state
+      ledState = !ledState;
+      
+      // Apply the new LED state
+      digitalWrite(ledPin, ledState);
+      
+      // Update the time for the next blink
+      lastButtonPressTime = currentMillis;
+    }
+  }
+}
