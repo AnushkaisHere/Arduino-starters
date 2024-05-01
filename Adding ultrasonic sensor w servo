@@ -1,0 +1,76 @@
+#include <Servo.h> // Include the Servo library
+
+// Pin definitions
+const int ledPin = 13;         // The built-in LED pin on most Arduino boards
+const int triggerPin = 7;      // The pin connected to the trigger pin of the ultrasonic sensor
+const int echoPin = 6;         // The pin connected to the echo pin of the ultrasonic sensor
+const int servoPin = 9;        // The pin where the servo motor is connected
+
+// Variable to store the current state of the LED
+bool ledState = LOW;
+
+// Variable to store whether the LED is blinking or not
+bool isBlinking = true;
+
+// Time to pause blinking when the object is detected (in milliseconds)
+const long pauseDuration = 10000; // 10 seconds
+
+// Interval at which the LED should blink (in milliseconds)
+const long blinkInterval = 500; // 0.5 second
+
+Servo servo; // Create a servo object
+
+void setup() {
+  // Initialize the LED pin as an output
+  pinMode(ledPin, OUTPUT);
+  
+  // Initialize the trigger pin of the ultrasonic sensor as an output
+  pinMode(triggerPin, OUTPUT);
+  
+  // Initialize the echo pin of the ultrasonic sensor as an input
+  pinMode(echoPin, INPUT);
+
+  // Attach the servo to its pin
+  servo.attach(servoPin);
+}
+
+void loop() {
+  // Trigger the ultrasonic sensor to send out a pulse
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+
+  // Read the pulse from the echo pin and calculate the distance
+  long duration = pulseIn(echoPin, HIGH);
+  int distance = duration * 0.034 / 2; // Convert the time to distance in cm (speed of sound is approximately 34 cm/microsecond)
+
+  // Check if an object is within a certain range (e.g., less than 5 cm)
+  if (distance < 5) {
+    // Stop blinking and run the servo motor for 3 seconds
+    isBlinking = false;
+    servo.write(90); // Move the servo to the middle position
+    delay(3000);     // Wait for 3 seconds
+    servo.write(0);  // Return the servo to the initial position
+  }
+  
+  // Check if the pause duration has passed since the object was detected
+  if (!isBlinking && distance >= 5) {
+    isBlinking = true; // Resume blinking after pause duration
+  }
+  
+  // If blinking is enabled, blink the LED
+  if (isBlinking) {
+    unsigned long currentMillis = millis();
+    
+    // Check if it's time to blink the LED
+    if (currentMillis - lastButtonPressTime >= blinkInterval) {
+      // Toggle the LED state
+      ledState = !ledState;
+      
+      // Apply the new LED state
+      digitalWrite(ledPin, ledState);
+    }
+  }
+}
